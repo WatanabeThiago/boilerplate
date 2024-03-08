@@ -1,0 +1,18 @@
+node_modules
+.vscode/
+build/*
+temp/
+coverage
+.DS_STORE
+logs/
+tmp/*
+!tmp/ .gitkeep
+dist/*
+ormconfig.ts
+.env
+pandoris-firebase.json
+
+dist/*
+mongo-volume
+dist
+build
