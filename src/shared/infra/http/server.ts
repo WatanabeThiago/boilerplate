@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable global-require */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable import/prefer-default-export */
 import 'reflect-metadata';
 import Fastify from 'fastify';
 import '@shared/container';
@@ -12,19 +7,13 @@ import os from 'os';
 import fastifyCors from '@fastify/cors';
 import env from '@config/env';
 import fastifyJwt from '@fastify/jwt';
-import fontsRoutes from '@modules/v1/fonts/infra/http/routes/fonts.routes';
-import productsRoutes from '@modules/v1/products/infra/http/routes/products.routes';
 import { ZodError } from 'zod';
 import routes from './routes'
 
-import { pipeline } from 'stream';
-import util from 'util';
-import fs from 'fs';
-
 import '../typeorm';
 import multipart from '@fastify/multipart';
+import App from '@shared/config/configServer';
 
-const pump = util.promisify(pipeline);
 const server = Fastify({
   logger: true,
 });
@@ -40,31 +29,10 @@ server.register(fastifyJwt, {
 
 routes()
 
-server.post('/upload', async function (req, reply) {
-
-  const parts = (req as any).parts()
-
-  for await (const part of parts) {
-    if (part.file) {
-      console.log(part)
-      // upload and save the file
-      await pump(part.file, fs.createWriteStream(`./uploads/${part.filename}`))
-
-    } else {
-      // do something with the non-files parts
-    }
-
-  }
-
-  return { message: 'files uploaded' }
-})
-
-server.register(fontsRoutes, {
-  prefix: 'v1/fonts',
-});
-server.register(productsRoutes, {
-  prefix: 'v1/products',
-});
+(async () => {
+  const app = new App()
+  await app.bootstrap('Foursys')
+})()
 
 server.get('/health', (req, reply) => {
   const instanceName = os.hostname();
@@ -81,15 +49,6 @@ server.get('/health', (req, reply) => {
     };
   });
 
-  const healthcheckData = {
-    status: 'OK',
-    instance: instanceName,
-    platform,
-    memory: {
-      total: Math.round(totalMemory / 1024 / 1024),
-      free: Math.round(freeMemory / 1024 / 1024),
-    },
-  };
 
   reply.code(200).send({
     status: 'OK',

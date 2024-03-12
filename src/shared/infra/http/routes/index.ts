@@ -15,8 +15,6 @@ export default function routes() {
   server.register(servicesRoutes, {
     prefix: 'v1/services',
   });
-
-
 }
 
 
